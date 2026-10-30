@@ -92,6 +92,17 @@ dns-switcher/
 ./pack_gnome_extension.sh
 ```
 
+#### Удаление расширения (Linux)
+
+Для полного и безопасного удаления запустите скрипт деинсталляции (он автоматически вернёт сетевые настройки адаптера на DHCP):
+```bash
+./uninstall.sh
+```
+Либо удалите через системную команду:
+```bash
+gnome-extensions uninstall dns-switcher@globulator
+```
+
 ### Windows
 
 1. Скачайте готовый `DNS-Switcher.exe` из раздела [Releases](https://github.com/globulator/dns-switcher/releases).
