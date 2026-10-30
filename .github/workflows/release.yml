@@ -31,6 +31,9 @@ jobs:
   build-windows:
     name: Build Windows Executable
     runs-on: windows-latest
+    env:
+      PYTHONIOENCODING: utf-8
+      PYTHONUTF8: "1"
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -56,34 +59,36 @@ jobs:
           cd dist
           7z a -tzip DNS-Switcher-Windows.zip DNS-Switcher.exe
 
-      - name: Upload Windows Artifact
+      - name: Upload Windows EXE
         uses: actions/upload-artifact@v4
         with:
-          name: dns-switcher-windows
+          name: dns-switcher-windows-exe
           path: dist/DNS-Switcher.exe
+
+      - name: Upload Windows ZIP
+        uses: actions/upload-artifact@v4
+        with:
+          name: dns-switcher-windows-zip
+          path: dist/DNS-Switcher-Windows.zip
 
   publish-release:
     name: Publish GitHub Release
     needs: [build-gnome, build-windows]
     if: startsWith(github.ref, 'refs/tags/v')
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Download GNOME Artifact
+      - name: Download all artifacts
         uses: actions/download-artifact@v4
         with:
-          name: dns-switcher-gnome
           path: release/
+          merge-multiple: true
 
-      - name: Download Windows Artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: dns-switcher-windows
-          path: release/
-
-      - name: Package Release
+      - name: List Release Files
         run: |
           ls -la release/
 
@@ -93,6 +98,7 @@ jobs:
           files: |
             release/dns-switcher@mcperchik.zip
             release/DNS-Switcher.exe
+            release/DNS-Switcher-Windows.zip
           draft: false
           prerelease: false
           generate_release_notes: true
