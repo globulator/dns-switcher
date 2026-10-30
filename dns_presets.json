@@ -1,0 +1,50 @@
+{
+  "active_category": "bypass",
+  "categories": [
+    {
+      "id": "bypass",
+      "title": "Антиблокировочные",
+      "icon": "network-vpn-symbolic",
+      "domains": [
+        "d.webshiftvpn.ru",
+        "dns.dns-ai.ru",
+        "dns.comss.one",
+        "router.comss.one",
+        "geohide.ru",
+        "dns.bezmezhau.com",
+        "dns.malw.link",
+        "dns.wlrus.cfd",
+        "free.shecan.ir"
+      ]
+    },
+    {
+      "id": "security",
+      "title": "Защитные",
+      "icon": "security-high-symbolic",
+      "domains": [
+        "dns.adguard-dns.com",
+        "dns.quad9.net",
+        "family.adguard-dns.com"
+      ]
+    },
+    {
+      "id": "global",
+      "title": "Глобальные",
+      "icon": "globe-symbolic",
+      "domains": [
+        "one.one.one.one",
+        "dns.google",
+        "dns.umbrella.com"
+      ]
+    },
+    {
+      "id": "national",
+      "title": "Национальные",
+      "icon": "emoji-flags-symbolic",
+      "domains": [
+        "common.dot.dns.yandex.net",
+        "safe.dot.dns.yandex.net"
+      ]
+    }
+  ]
+}

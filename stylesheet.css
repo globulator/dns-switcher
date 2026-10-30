@@ -1,0 +1,570 @@
+/* DNS Switcher GNOME Shell Extension Styles */
+
+.dns-menu-box {
+    min-width: 330px;
+    max-width: 360px;
+    padding: 10px;
+}
+
+/* Top Search Bar */
+.dns-search-container {
+    margin-bottom: 8px;
+    padding: 0 2px;
+    spacing: 6px;
+}
+
+.dns-search-entry {
+    background-color: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 18px;
+    padding: 6px 12px;
+    color: #ffffff;
+    font-size: 13px;
+    height: 24px;
+}
+
+.dns-search-entry:focus {
+    border-color: rgba(53, 132, 228, 0.7);
+    background-color: rgba(255, 255, 255, 0.12);
+}
+
+.dns-search-icon {
+    icon-size: 15px;
+    color: rgba(255, 255, 255, 0.55);
+    margin-right: 6px;
+}
+
+.dns-btn-sort {
+    width: 34px !important;
+    height: 34px !important;
+    min-width: 34px !important;
+    min-height: 34px !important;
+    border-radius: 17px !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    background-color: rgba(255, 255, 255, 0.08) !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    color: #ffffff !important;
+    transition-duration: 120ms;
+}
+
+.dns-btn-sort:hover {
+    background-color: rgba(255, 255, 255, 0.16) !important;
+    border-color: rgba(255, 255, 255, 0.25) !important;
+}
+
+.dns-btn-sort-icon {
+    icon-size: 15px;
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+/* Tab Bar */
+.dns-tabs-box {
+    margin-bottom: 8px;
+    padding: 3px;
+    spacing: 4px;
+    background-color: rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.dns-tab-btn,
+button.dns-tab-btn {
+    height: 30px !important;
+    min-height: 30px !important;
+    border-radius: 9px !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    background-color: transparent !important;
+    border: 1px solid transparent !important;
+    color: rgba(255, 255, 255, 0.55) !important;
+    transition-duration: 120ms;
+}
+
+.dns-tab-btn:hover,
+button.dns-tab-btn:hover {
+    color: #ffffff !important;
+    background-color: rgba(255, 255, 255, 0.09) !important;
+}
+
+.dns-tab-btn.active,
+button.dns-tab-btn.active {
+    color: #ffffff !important;
+    background-color: rgba(53, 132, 228, 0.35) !important;
+    border-color: rgba(53, 132, 228, 0.75) !important;
+}
+
+.dns-tab-icon {
+    icon-size: 16px;
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+/* Scroll area */
+.dns-scroll-view {
+    max-height: 380px;
+}
+
+.dns-list-container {
+    spacing: 3px;
+}
+
+/* Row items */
+.dns-row {
+    padding: 2px 6px;
+    border-radius: 10px;
+    background-color: transparent;
+    border: 1px solid transparent;
+    transition-duration: 120ms;
+}
+
+/* Faint glow on hover when mouse is over row */
+.dns-row:hover {
+    background-color: rgba(255, 255, 255, 0.08);
+    border: 1px solid transparent;
+}
+
+/* Prominent highlight when active */
+.dns-row.active {
+    background-color: rgba(255, 255, 255, 0.16);
+    border: 1px solid rgba(255, 255, 255, 0.22);
+}
+
+.dns-row.active:hover {
+    background-color: rgba(255, 255, 255, 0.20);
+    border: 1px solid rgba(255, 255, 255, 0.26);
+}
+
+.dns-row-content {
+    background-color: transparent;
+    border: none;
+    padding: 5px 4px;
+    border-radius: 8px;
+}
+
+.dns-row-content:focus {
+    outline: none;
+}
+
+/* Radio button */
+.dns-radio {
+    width: 16px;
+    height: 16px;
+    border-radius: 9px;
+    border: 1px solid rgba(255, 255, 255, 0.45);
+    background-color: transparent;
+    margin-right: 10px;
+}
+
+.dns-radio.active {
+    border: 2px solid #3584e4;
+    background-color: transparent;
+}
+
+.dns-radio-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 3px;
+    background-color: #3584e4;
+}
+
+/* Text labels */
+.dns-domain-label {
+    font-size: 13px;
+    color: #ffffff;
+    font-weight: normal;
+}
+
+.dns-row.active .dns-domain-label {
+    font-weight: 500;
+}
+
+.dns-default-icon {
+    icon-size: 16px;
+    color: #ffffff;
+    margin-right: 8px;
+}
+
+/* Protocol badges */
+.dns-badge-dot {
+    font-size: 10px;
+    font-weight: bold;
+    color: #78aeed;
+    background-color: rgba(53, 132, 228, 0.2);
+    border: 1px solid rgba(53, 132, 228, 0.45);
+    border-radius: 6px;
+    padding: 1px 5px;
+    margin-right: 8px;
+}
+
+.dns-badge-doh {
+    font-size: 10px;
+    font-weight: bold;
+    color: #e5a50a;
+    background-color: rgba(229, 165, 10, 0.18);
+    border: 1px solid rgba(229, 165, 10, 0.45);
+    border-radius: 6px;
+    padding: 1px 5px;
+    margin-right: 8px;
+}
+
+.dns-badge-udp {
+    font-size: 10px;
+    color: rgba(255, 255, 255, 0.45);
+    background-color: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 6px;
+    padding: 1px 5px;
+    margin-right: 8px;
+}
+
+.dns-latency-ok {
+    font-size: 12px;
+    font-weight: 600;
+    color: #33d17a;
+    margin-right: 8px;
+}
+
+.dns-latency-error {
+    font-size: 12px;
+    color: #f66151;
+    margin-right: 8px;
+}
+
+.dns-latency-checking {
+    font-size: 13px;
+    font-weight: bold;
+    color: rgba(255, 255, 255, 0.45);
+    margin-right: 8px;
+    min-width: 28px;
+    text-align: left;
+}
+
+/* Trash / Delete button */
+.dns-btn-trash {
+    padding: 3px 6px;
+    border-radius: 6px;
+    background-color: transparent;
+    border: none;
+    color: rgba(255, 255, 255, 0.5);
+    transition-duration: 120ms;
+}
+
+.dns-btn-trash:hover {
+    color: #f66151;
+    background-color: rgba(255, 255, 255, 0.14);
+}
+
+.dns-trash-icon {
+    icon-size: 15px;
+}
+
+/* Separator */
+.dns-separator {
+    height: 1px;
+    background-color: rgba(255, 255, 255, 0.08);
+    margin: 6px 2px;
+}
+
+/* Bottom Bar */
+.dns-bottom-bar {
+    margin-top: 6px;
+    padding: 2px 2px 0 2px;
+}
+
+.dns-btn-bottom,
+button.dns-btn-bottom {
+    width: 32px !important;
+    height: 32px !important;
+    min-width: 32px !important;
+    min-height: 32px !important;
+    max-width: 32px !important;
+    max-height: 32px !important;
+    border-radius: 999px !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    background-color: rgba(255, 255, 255, 0.08) !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    color: #ffffff !important;
+    transition-duration: 120ms;
+}
+
+.dns-btn-bottom:hover,
+button.dns-btn-bottom:hover {
+    background-color: rgba(255, 255, 255, 0.15) !important;
+    border-color: rgba(255, 255, 255, 0.22) !important;
+}
+
+.dns-btn-bottom-icon {
+    icon-size: 16px;
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+.dns-plus-icon {
+    icon-size: 16px;
+    padding: 0 !important;
+    margin: 1px 0 0 1px !important;
+}
+
+.dns-btn-donate,
+button.dns-btn-donate {
+    margin-left: 6px !important;
+}
+
+.dns-btn-donate:hover,
+button.dns-btn-donate:hover {
+    background-color: rgba(241, 95, 43, 0.22) !important;
+    border-color: rgba(241, 95, 43, 0.6) !important;
+    color: #f15f2b !important;
+}
+
+.dns-donate-icon {
+    icon-size: 16px;
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+/* Target selector dropdown button */
+.dns-btn-target {
+    background-color: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: 16px;
+    padding: 4px 12px;
+    color: #ffffff;
+    transition-duration: 120ms;
+    margin: 0 6px;
+    height: 22px;
+}
+
+.dns-btn-target:hover {
+    background-color: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.25);
+}
+
+.dns-btn-target.active {
+    background-color: rgba(53, 132, 228, 0.2);
+    border-color: rgba(53, 132, 228, 0.5);
+}
+
+.dns-target-icon {
+    icon-size: 14px;
+    color: rgba(255, 255, 255, 0.7);
+    margin-right: 6px;
+}
+
+.dns-target-label {
+    font-size: 12px;
+    font-weight: 500;
+    color: #ffffff;
+    margin-right: 6px;
+}
+
+.dns-target-arrow {
+    icon-size: 11px;
+    color: rgba(255, 255, 255, 0.6);
+}
+
+/* Targets popup panel */
+.dns-targets-panel {
+    background-color: rgba(28, 28, 32, 0.98);
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    border-radius: 10px;
+    padding: 8px;
+    margin-bottom: 8px;
+}
+
+.dns-targets-header {
+    margin-bottom: 6px;
+    padding: 0 4px;
+}
+
+.dns-targets-title {
+    font-size: 11px;
+    font-weight: bold;
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.dns-target-row {
+    padding: 2px 4px;
+    border-radius: 8px;
+    background-color: transparent;
+    transition-duration: 120ms;
+    margin-bottom: 2px;
+}
+
+.dns-target-row:hover {
+    background-color: rgba(255, 255, 255, 0.08);
+}
+
+.dns-target-row.active {
+    background-color: rgba(255, 255, 255, 0.14);
+}
+
+.dns-target-content {
+    padding: 3px 6px;
+    background-color: transparent;
+    border: none;
+}
+
+.dns-target-item-label {
+    font-size: 12px;
+    color: #ffffff;
+}
+
+.dns-target-add-box {
+    margin-top: 6px;
+    padding-top: 6px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.dns-target-add-entry {
+    background-color: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 6px;
+    padding: 4px 6px;
+    font-size: 11px;
+    color: #ffffff;
+}
+
+.dns-target-add-btn,
+button.dns-target-add-btn {
+    width: 28px !important;
+    height: 28px !important;
+    min-width: 28px !important;
+    min-height: 28px !important;
+    max-width: 28px !important;
+    max-height: 28px !important;
+    border-radius: 8px !important;
+    padding: 0 !important;
+    margin: 0 0 0 6px !important;
+    background-color: rgba(53, 132, 228, 0.3) !important;
+    border: 1px solid rgba(53, 132, 228, 0.6) !important;
+    color: #ffffff !important;
+    transition-duration: 120ms;
+}
+
+.dns-target-add-btn:hover,
+button.dns-target-add-btn:hover {
+    background-color: rgba(53, 132, 228, 0.5) !important;
+}
+
+.dns-target-add-icon {
+    icon-size: 14px;
+    padding: 0 !important;
+    margin: 1px 0 0 1px !important;
+}
+
+/* Inline Add Input */
+.dns-add-box {
+    padding: 4px 6px;
+    margin-bottom: 6px;
+    border-radius: 12px;
+    background-color: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(53, 132, 228, 0.5);
+    spacing: 6px;
+}
+
+.dns-add-entry {
+    color: #ffffff;
+    font-size: 13px;
+    padding: 4px 8px;
+}
+
+.dns-btn-add-type,
+button.dns-btn-add-type {
+    width: 28px !important;
+    height: 28px !important;
+    min-width: 28px !important;
+    min-height: 28px !important;
+    border-radius: 999px !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    background-color: rgba(53, 132, 228, 0.2) !important;
+    border: 1px solid rgba(53, 132, 228, 0.4) !important;
+    color: #78aeed !important;
+    transition-duration: 120ms;
+}
+
+.dns-btn-add-type:hover,
+button.dns-btn-add-type:hover {
+    background-color: rgba(53, 132, 228, 0.4) !important;
+    border-color: rgba(53, 132, 228, 0.7) !important;
+    color: #ffffff !important;
+}
+
+.dns-btn-add-type-icon {
+    icon-size: 14px;
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+.dns-btn-add-apply,
+button.dns-btn-add-apply {
+    width: 28px !important;
+    height: 28px !important;
+    min-width: 28px !important;
+    min-height: 28px !important;
+    border-radius: 999px !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    background-color: rgba(51, 209, 122, 0.2) !important;
+    border: 1px solid rgba(51, 209, 122, 0.5) !important;
+    color: #33d17a !important;
+    transition-duration: 120ms;
+}
+
+.dns-btn-add-apply:hover,
+button.dns-btn-add-apply:hover {
+    background-color: rgba(51, 209, 122, 0.4) !important;
+    border-color: rgba(51, 209, 122, 0.8) !important;
+    color: #ffffff !important;
+}
+
+.dns-btn-add-apply-icon {
+    icon-size: 14px;
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+/* --- Top Panel: Compact, uniform, and round buttons --- */
+#panel .panel-button {
+    -natural-hpadding: 6px;
+    -minimum-hpadding: 4px;
+    padding: 0 4px;
+    margin: 0 1px;
+    border-radius: 999px;
+    min-height: 28px;
+    min-width: 28px;
+    transition-duration: 120ms;
+}
+
+#panel .panel-button .system-status-icon {
+    padding: 0 2px;
+    margin: 0;
+    icon-size: 16px;
+}
+
+#panel .panel-status-indicators-box {
+    spacing: 4px;
+}
+
+#panel .appindicator-box {
+    spacing: 4px;
+}
+
+/* Status colors for panel indicator icon */
+#panel .dns-icon-status.dns-status-success {
+    color: #33d17a !important;
+}
+
+#panel .dns-icon-status.dns-status-failed {
+    color: #f66151 !important;
+}
+
+#panel .dns-icon-status.dns-status-default {
+    color: #ffffff !important;
+}
+
+

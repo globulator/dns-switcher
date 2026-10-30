@@ -1,0 +1,29 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+
+# Build artifacts
+dist/
+build/
+*.spec
+*.tmp
+*.tmp.*
+.lock
+
+# User state & local cache
+cache_latencies.json
+current_dns.json
+current_target.json
+
+# IDE & Editor
+.vscode/
+.idea/
+*.swp
+*~
+.DS_Store
