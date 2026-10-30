@@ -80,11 +80,11 @@ dns-switcher/
 1. Подключение расширения через символическую ссылку:
    ```bash
    mkdir -p ~/.local/share/gnome-shell/extensions
-   ln -sfn ~/Applications/dns-switcher ~/.local/share/gnome-shell/extensions/dns-switcher@mcperchik
+   ln -sfn ~/Applications/dns-switcher ~/.local/share/gnome-shell/extensions/dns-switcher@globulator
    ```
 2. Включение расширения:
    ```bash
-   gnome-extensions enable dns-switcher@mcperchik
+   gnome-extensions enable dns-switcher@globulator
    ```
 
 Либо соберите архив для установки через GNOME Extensions:

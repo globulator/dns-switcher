@@ -5,7 +5,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 DIST_DIR="$SCRIPT_DIR/dist"
 mkdir -p "$DIST_DIR"
 
-OUTPUT_ZIP="$DIST_DIR/dns-switcher@mcperchik.zip"
+OUTPUT_ZIP="$DIST_DIR/DNS-Switcher-Linux-GNOME.zip"
 rm -f "$OUTPUT_ZIP"
 
 echo "Упаковка расширения GNOME Shell в $OUTPUT_ZIP..."

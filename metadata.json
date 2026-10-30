@@ -1,5 +1,5 @@
 {
-  "uuid": "dns-switcher@mcperchik",
+  "uuid": "dns-switcher@globulator",
   "name": "DNS Switcher",
   "description": "Быстрое переключение DNS в верхней панели GNOME с проверкой задержки",
   "shell-version": [
