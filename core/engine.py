@@ -10,6 +10,7 @@ import concurrent.futures
 import http.client
 import ipaddress
 import json
+import os
 import random
 import socket
 import ssl
@@ -23,6 +24,8 @@ from core.storage import (
     save_cached_latencies,
     normalize_host
 )
+
+_STRICT_TLS_CTX = ssl.create_default_context()
 
 _TLS_CTX = ssl.create_default_context()
 _TLS_CTX.check_hostname = False
@@ -133,7 +136,7 @@ def check_target_reachability(ips, target_host):
             t0 = time.monotonic()
             try:
                 s.connect((ip, 443))
-                with _TLS_CTX.wrap_socket(s, server_hostname=target_host) as ssl_sock:
+                with _STRICT_TLS_CTX.wrap_socket(s, server_hostname=target_host) as ssl_sock:
                     dt = max(1, int((time.monotonic() - t0) * 1000))
                     return True, dt
             except ssl.SSLError:
@@ -158,13 +161,17 @@ def check_target_reachability(ips, target_host):
     return False, 0
 
 def udp_query(ip, qid, pkt, timeout):
+    deadline = time.monotonic() + timeout
     with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
-        s.settimeout(timeout)
         try:
             s.connect((ip, 53))
             t0 = time.monotonic()
             s.send(pkt)
             while True:
+                rem = deadline - time.monotonic()
+                if rem <= 0:
+                    return None
+                s.settimeout(rem)
                 resp = s.recv(2048)
                 if response_matches(qid, resp):
                     return resp, max(1, int((time.monotonic() - t0) * 1000))
@@ -175,7 +182,7 @@ def dot_query(ip, host, qid, pkt, timeout):
     t0 = time.monotonic()
     try:
         with socket.create_connection((ip, 853), timeout=timeout) as raw, \
-             _TLS_CTX.wrap_socket(raw, server_hostname=host) as tls:
+             _STRICT_TLS_CTX.wrap_socket(raw, server_hostname=host) as tls:
             tls.sendall(struct.pack(">H", len(pkt)) + pkt)
             raw_len = recv_exact(tls, 2)
             n = struct.unpack(">H", raw_len)[0]
@@ -189,7 +196,7 @@ def dot_query(ip, host, qid, pkt, timeout):
 def doh_query(host, qid, pkt, timeout):
     path = "/dns-query?dns=" + base64.urlsafe_b64encode(pkt).decode().rstrip("=")
     t0 = time.monotonic()
-    conn = http.client.HTTPSConnection(host, 443, timeout=timeout, context=_TLS_CTX)
+    conn = http.client.HTTPSConnection(host, 443, timeout=timeout, context=_STRICT_TLS_CTX)
     try:
         conn.request("GET", path, headers={
             "accept": "application/dns-message",
@@ -207,24 +214,37 @@ def doh_query(host, qid, pkt, timeout):
 
 def system_resolver_ips():
     ips = []
-    # On Linux, parse /etc/resolv.conf
-    try:
-        with open("/etc/resolv.conf", "r", encoding="utf-8") as f:
-            for line in f:
-                p = line.split()
-                if len(p) >= 2 and p[0] == "nameserver":
+    if os.name == "nt":
+        try:
+            from platforms.windows import WindowsNetworkAdapter
+            w = WindowsNetworkAdapter()
+            if_index, _ = w.get_active_interface_win()
+            if if_index is not None:
+                win_ips = w.get_current_dns_win(if_index)
+                for ip in win_ips:
                     try:
-                        addr = ipaddress.ip_address(p[1])
-                        if addr.version == 4:
-                            ips.append(p[1])
+                        if ipaddress.ip_address(ip).version == 4:
+                            ips.append(ip)
                     except ValueError:
                         pass
-    except OSError:
-        pass
+        except Exception:
+            pass
+    else:
+        # On Linux, parse /etc/resolv.conf
+        try:
+            with open("/etc/resolv.conf", "r", encoding="utf-8") as f:
+                for line in f:
+                    p = line.split()
+                    if len(p) >= 2 and p[0] == "nameserver":
+                        try:
+                            addr = ipaddress.ip_address(p[1])
+                            if addr.version == 4:
+                                ips.append(p[1])
+                        except ValueError:
+                            pass
+        except OSError:
+            pass
 
-    if not ips:
-        # Fallback public DNS if no system resolver detected
-        ips = ["1.1.1.1", "8.8.8.8"]
     return ips
 
 def probe_default(target, qid, pkt):

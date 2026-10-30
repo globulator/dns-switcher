@@ -11,15 +11,23 @@ rm -f "$OUTPUT_ZIP"
 echo "Упаковка расширения GNOME Shell в $OUTPUT_ZIP..."
 
 cd "$SCRIPT_DIR"
-zip -r "$OUTPUT_ZIP" \
-    metadata.json \
-    extension.js \
-    stylesheet.css \
-    dns_backend.py \
-    dns_presets.json \
-    targets_list.txt \
-    core/ \
-    platforms/ \
+
+FILES_TO_PACK=(
+    metadata.json
+    extension.js
+    stylesheet.css
+    dns_backend.py
+    core/
+    platforms/
+)
+
+for f in dns_presets.json targets_list.txt dns_list.txt; do
+    if [ -f "$f" ]; then
+        FILES_TO_PACK+=("$f")
+    fi
+done
+
+zip -r "$OUTPUT_ZIP" "${FILES_TO_PACK[@]}" \
     -x "*.pyc" -x "*__pycache__*" -x "*.tmp*"
 
 echo "Готово! Расширение упаковано: $OUTPUT_ZIP"

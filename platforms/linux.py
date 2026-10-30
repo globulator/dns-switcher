@@ -206,17 +206,27 @@ class LinuxNetworkAdapter(BaseNetworkAdapter):
                 save_state(state)
 
             # 3. Apply
-            proto_value = "1"
-            dns_str_with_host = " ".join(f"{ip}#{domain}" for ip in ips)
-            dns_str_plain = " ".join(ips)
+            if info.get("proto") == "dot":
+                proto_value = "1"
+                dns_str_with_host = " ".join(f"{ip}#{domain}" for ip in ips)
+                dns_str_plain = " ".join(ips)
 
-            ok, err = self.nm_modify(uuid, {
-                "ipv4.dns": dns_str_with_host,
-                "ipv4.ignore-auto-dns": "yes",
-                "ipv4.dns-priority": "-50",
-                "connection.dns-over-tls": proto_value
-            })
-            if not ok:
+                ok, err = self.nm_modify(uuid, {
+                    "ipv4.dns": dns_str_with_host,
+                    "ipv4.ignore-auto-dns": "yes",
+                    "ipv4.dns-priority": "-50",
+                    "connection.dns-over-tls": proto_value
+                })
+                if not ok:
+                    ok, err = self.nm_modify(uuid, {
+                        "ipv4.dns": dns_str_plain,
+                        "ipv4.ignore-auto-dns": "yes",
+                        "ipv4.dns-priority": "-50",
+                        "connection.dns-over-tls": proto_value
+                    })
+            else:
+                proto_value = "0"
+                dns_str_plain = " ".join(ips)
                 ok, err = self.nm_modify(uuid, {
                     "ipv4.dns": dns_str_plain,
                     "ipv4.ignore-auto-dns": "yes",

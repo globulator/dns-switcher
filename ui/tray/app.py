@@ -18,8 +18,8 @@ if PROJECT_ROOT not in sys.path:
 # Qt import abstraction (supports PyQt6 and PySide6)
 try:
     from PyQt6 import QtCore, QtGui, QtWidgets
-    from PyQt6.QtCore import Qt, QThread, pyqtSignal, QTimer, QPoint, QSize
-    from PyQt6.QtGui import QIcon, QColor, QPainter, QBrush, QPen, QFont, QCursor, QPixmap
+    from PyQt6.QtCore import Qt, QThread, pyqtSignal, QTimer, QPoint, QSize, QRect
+    from PyQt6.QtGui import QIcon, QColor, QPainter, QBrush, QPen, QFont, QCursor, QPixmap, QGuiApplication
     from PyQt6.QtWidgets import (
         QApplication, QWidget, QVBoxLayout, QHBoxLayout, QLineEdit,
         QPushButton, QLabel, QScrollArea, QFrame, QSystemTrayIcon,
@@ -28,8 +28,8 @@ try:
 except ImportError:
     try:
         from PySide6 import QtCore, QtGui, QtWidgets
-        from PySide6.QtCore import Qt, QThread, Signal as pyqtSignal, QTimer, QPoint, QSize
-        from PySide6.QtGui import QIcon, QColor, QPainter, QBrush, QPen, QFont, QCursor, QPixmap
+        from PySide6.QtCore import Qt, QThread, Signal as pyqtSignal, QTimer, QPoint, QSize, QRect
+        from PySide6.QtGui import QIcon, QColor, QPainter, QBrush, QPen, QFont, QCursor, QPixmap, QGuiApplication
         from PySide6.QtWidgets import (
             QApplication, QWidget, QVBoxLayout, QHBoxLayout, QLineEdit,
             QPushButton, QLabel, QScrollArea, QFrame, QSystemTrayIcon,
@@ -280,6 +280,18 @@ class ProbeWorker(QThread):
         probe_all(target=self.target, callback=self.result_signal.emit)
         self.finished_signal.emit()
 
+class SingleProbeWorker(QThread):
+    result_signal = pyqtSignal(dict)
+
+    def __init__(self, domain, target):
+        super().__init__()
+        self.domain = domain
+        self.target = target
+
+    def run(self):
+        res = probe_domain(self.domain, self.target)
+        self.result_signal.emit(res)
+
 class ApplyWorker(QThread):
     done_signal = pyqtSignal(dict)
 
@@ -526,15 +538,24 @@ class MainWindow(QWidget):
 
         presets = load_presets()
         self.tab_buttons = {}
+        category_labels = {
+            "bypass": "🛡️ Обход",
+            "security": "🔒 Защита",
+            "global": "🌍 Мир",
+            "national": "🏳️ Регион",
+        }
         for cat in presets.get("categories", []):
-            btn = QPushButton(cat.get("title", ""))
-            btn.setProperty("cat_id", cat["id"])
+            cid = cat["id"]
+            lbl = category_labels.get(cid, cat.get("title", ""))
+            btn = QPushButton(lbl)
+            btn.setToolTip(cat.get("title", ""))
+            btn.setProperty("cat_id", cid)
             btn.setProperty("class", "TabButton")
             btn.setCursor(Qt.CursorShape.PointingHandCursor)
             btn.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred)
-            btn.clicked.connect(lambda _, cid=cat["id"]: self._switch_tab(cid))
+            btn.clicked.connect(lambda _, c=cid: self._switch_tab(c))
             self.tabs_layout.addWidget(btn)
-            self.tab_buttons[cat["id"]] = btn
+            self.tab_buttons[cid] = btn
 
         self.root_layout.addWidget(self.tabs_container)
 
@@ -730,22 +751,28 @@ class MainWindow(QWidget):
         self.default_row.style().polish(self.default_row)
 
         def_cache = self.cached_latencies.get("DEFAULT")
-        if def_cache and def_cache.get("ok"):
-            self.def_latency.setText(f"{def_cache.get('latency')} ms")
-            self.def_latency.setProperty("class", "LatencyOk")
+        if def_cache:
+            if def_cache.get("ok"):
+                self.def_latency.setText(f"{def_cache.get('latency')} ms")
+                self.def_latency.setProperty("class", "LatencyOk")
+            else:
+                self.def_latency.setText(def_cache.get("text", "не отвечает"))
+                self.def_latency.setProperty("class", "LatencyError")
         else:
             self.def_latency.setText("")
         self.def_latency.style().unpolish(self.def_latency)
         self.def_latency.style().polish(self.def_latency)
 
-        domains = []
-        for cat in presets.get("categories", []):
-            if cat.get("id") == self.active_category:
-                domains = list(cat.get("domains", []))
-                break
-
         if self.search_query:
-            domains = [d for d in domains if self.search_query in d.lower()]
+            domains = [d for d in load_dns_list() if self.search_query in d.lower()]
+            self.tabs_container.hide()
+        else:
+            self.tabs_container.show()
+            domains = []
+            for cat in presets.get("categories", []):
+                if cat.get("id") == self.active_category:
+                    domains = list(cat.get("domains", []))
+                    break
 
         if self.sort_by_latency:
             def sort_key(d):
@@ -817,6 +844,9 @@ class MainWindow(QWidget):
         self.rows_layout.addStretch()
 
     def _delete_dns(self, domain):
+        active_status = self.adapter.get_current_dns()
+        if active_status.get("domain") == domain:
+            self._apply_dns("DEFAULT")
         remove_dns(domain)
         self._refresh_rows()
 
@@ -853,15 +883,10 @@ class MainWindow(QWidget):
         self.dot_timer.start(300)
         self._refresh_rows()
 
-        def do_single():
-            res = probe_domain(domain)
-            self._on_probe_result(res)
-            self.pending_domains.discard(domain)
-            if not self.pending_domains:
-                self.dot_timer.stop()
-
-        import threading
-        threading.Thread(target=do_single, daemon=True).start()
+        target = get_active_target()
+        self.single_probe_worker = SingleProbeWorker(domain, target)
+        self.single_probe_worker.result_signal.connect(self._on_probe_result)
+        self.single_probe_worker.start()
 
     def _on_probe_result(self, res):
         dom = res.get("domain")
@@ -886,7 +911,8 @@ class MainWindow(QWidget):
                 badge = w["badge"]
                 proto = res.get("proto", "udp").lower()
                 badge.setText(proto.upper())
-                badge.setProperty("class", f"Badge{proto.upper()}")
+                cls_map = {"dot": "BadgeDoT", "doh": "BadgeDoH", "udp": "BadgeUDP"}
+                badge.setProperty("class", cls_map.get(proto, "BadgeUDP"))
                 badge.style().unpolish(badge)
                 badge.style().polish(badge)
 
@@ -894,6 +920,9 @@ class MainWindow(QWidget):
                 if res.get("ok"):
                     self.def_latency.setText(f"{res.get('latency')} ms")
                     self.def_latency.setProperty("class", "LatencyOk")
+                else:
+                    self.def_latency.setText(res.get("text", "не отвечает"))
+                    self.def_latency.setProperty("class", "LatencyError")
                 self.def_latency.style().unpolish(self.def_latency)
                 self.def_latency.style().polish(self.def_latency)
 
@@ -912,6 +941,10 @@ class MainWindow(QWidget):
 
     def _on_update_found(self, info):
         self.lbl_update.setText(f"Новая версия: {info.get('latest_version')}!")
+        try:
+            self.btn_update.clicked.disconnect()
+        except Exception:
+            pass
         self.btn_update.clicked.connect(lambda: webbrowser.open(info.get("download_url")))
         self.update_banner.show()
 
@@ -966,20 +999,31 @@ class SystemTrayApp:
             self.window.activateWindow()
 
     def position_window_near_tray(self):
-        geo = self.tray.geometry()
-        screen = QApplication.primaryScreen().availableGeometry()
+        cursor_pos = QCursor.pos()
+        screen = QGuiApplication.screenAt(cursor_pos) or QApplication.primaryScreen()
+        screen_geo = screen.availableGeometry() if screen else QRect(0, 0, 1920, 1080)
         w = self.window.width()
         h = self.window.height()
 
+        geo = self.tray.geometry()
         if geo.x() > 0 and geo.y() > 0:
-            x = geo.x() - w // 2 + geo.width() // 2
-            y = geo.y() - h - 10
+            target_x = geo.x() + geo.width() // 2
+            target_y = geo.y()
+            target_h = geo.height()
         else:
-            x = screen.width() - w - 20
-            y = screen.height() - h - 20
+            target_x = cursor_pos.x()
+            target_y = cursor_pos.y()
+            target_h = 24
 
-        x = max(screen.left() + 10, min(x, screen.right() - w - 10))
-        y = max(screen.top() + 10, min(y, screen.bottom() - h - 10))
+        x = target_x - w // 2
+        # If tray is in top half of screen (e.g. top taskbar/panel): place below
+        if target_y < screen_geo.center().y():
+            y = target_y + target_h + 10
+        else:
+            y = target_y - h - 10
+
+        x = max(screen_geo.left() + 10, min(x, screen_geo.right() - w - 10))
+        y = max(screen_geo.top() + 10, min(y, screen_geo.bottom() - h - 10))
 
         self.window.move(QPoint(x, y))
 

@@ -3,6 +3,7 @@
 Windows Network Adapter implementation using PowerShell and netsh.
 """
 
+import ipaddress
 import json
 import os
 import socket
@@ -14,6 +15,17 @@ from core.storage import load_state, save_state, file_lock
 from core.engine import probe_domain
 
 CREATE_NO_WINDOW = 0x08000000 if os.name == "nt" else 0
+
+def _validate_ips(ips):
+    valid = []
+    if isinstance(ips, (list, tuple, set)):
+        for ip in ips:
+            if isinstance(ip, str):
+                try:
+                    valid.append(str(ipaddress.ip_address(ip.strip())))
+                except ValueError:
+                    pass
+    return valid
 
 def run_powershell(command, timeout=10):
     cmd = ["powershell", "-NoProfile", "-NonInteractive", "-ExecutionPolicy", "Bypass", "-Command", command]
@@ -168,15 +180,21 @@ class WindowsNetworkAdapter(BaseNetworkAdapter):
 
             # Fresh probe
             info = probe_domain(domain)
-            if not info.get("ok") and not info.get("ips"):
+            if not info.get("proto"):
                 return {"success": False, "error": f"{domain}: {info.get('text', 'не отвечает')}"}
 
+            if info.get("proto") == "doh":
+                return {"success": False, "error": "DoH не поддерживается для системного применения в Windows"}
+            if info.get("proto") == "dot":
+                return {"success": False, "error": "DoT не поддерживается стандартным сетевым стеком Windows (порт 853)"}
+
             ips = info.get("ips", [])
-            if not ips:
-                return {"success": False, "error": f"Не удалось определить IP для {domain}"}
+            valid_ips = _validate_ips(ips[:2])
+            if not valid_ips:
+                return {"success": False, "error": f"Не удалось определить валидные IP для {domain}"}
 
             # Apply
-            ip_args = ", ".join(f"'{ip}'" for ip in ips[:2])
+            ip_args = ", ".join(f"'{ip}'" for ip in valid_ips)
             ps_apply = f"Set-DnsClientServerAddress -InterfaceIndex {if_index} -ServerAddresses @({ip_args}); Clear-DnsClientCache"
             ok, _, err = run_powershell(ps_apply)
             if not ok:
@@ -186,8 +204,9 @@ class WindowsNetworkAdapter(BaseNetworkAdapter):
             if not self.dns_really_works():
                 # Rollback
                 orig = state.get("original", {}).get(str(if_index), [])
-                if orig:
-                    orig_args = ", ".join(f"'{ip}'" for ip in orig)
+                valid_orig = _validate_ips(orig)
+                if valid_orig:
+                    orig_args = ", ".join(f"'{ip}'" for ip in valid_orig)
                     ps_rb = f"Set-DnsClientServerAddress -InterfaceIndex {if_index} -ServerAddresses @({orig_args}); Clear-DnsClientCache"
                 else:
                     ps_rb = f"Set-DnsClientServerAddress -InterfaceIndex {if_index} -ResetServerAddresses; Clear-DnsClientCache"

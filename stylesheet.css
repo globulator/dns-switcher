@@ -529,7 +529,7 @@ button.dns-btn-add-apply:hover {
 }
 
 /* --- Top Panel: Compact, uniform, and round buttons --- */
-#panel .panel-button {
+#panel .panel-button.dns-panel-button {
     -natural-hpadding: 6px;
     -minimum-hpadding: 4px;
     padding: 0 4px;
@@ -540,18 +540,10 @@ button.dns-btn-add-apply:hover {
     transition-duration: 120ms;
 }
 
-#panel .panel-button .system-status-icon {
+#panel .panel-button.dns-panel-button .system-status-icon {
     padding: 0 2px;
     margin: 0;
     icon-size: 16px;
-}
-
-#panel .panel-status-indicators-box {
-    spacing: 4px;
-}
-
-#panel .appindicator-box {
-    spacing: 4px;
 }
 
 /* Status colors for panel indicator icon */
