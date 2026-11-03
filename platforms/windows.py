@@ -178,17 +178,13 @@ class WindowsNetworkAdapter(BaseNetworkAdapter):
                 save_state(state)
                 return {"success": True, "domain": "DEFAULT", "applied": "automatic"}
 
-            # Fresh probe
+            # Fresh probe to get valid IPs
             info = probe_domain(domain)
-            if not info.get("proto"):
-                return {"success": False, "error": f"{domain}: {info.get('text', 'не отвечает')}"}
-
-            if info.get("proto") == "doh":
-                return {"success": False, "error": "DoH не поддерживается для системного применения в Windows"}
-            if info.get("proto") == "dot":
-                return {"success": False, "error": "DoT не поддерживается стандартным сетевым стеком Windows (порт 853)"}
-
             ips = info.get("ips", [])
+            if not ips:
+                from core.engine import resolve_v4
+                ips = resolve_v4(domain, timeout=2.0)
+
             valid_ips = _validate_ips(ips[:2])
             if not valid_ips:
                 return {"success": False, "error": f"Не удалось определить валидные IP для {domain}"}
@@ -229,3 +225,49 @@ class WindowsNetworkAdapter(BaseNetworkAdapter):
             return {"status": "default", "domain": "DEFAULT"}
         domain = cur.get("domain", "DEFAULT")
         return {"status": "success" if self.dns_really_works() else "failed", "domain": domain}
+
+    def get_autostart(self):
+        if os.name != "nt":
+            return False
+        try:
+            import winreg
+            key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, r"Software\Microsoft\Windows\CurrentVersion\Run", 0, winreg.KEY_READ)
+            winreg.QueryValueEx(key, "DNS-Switcher")
+            winreg.CloseKey(key)
+            return True
+        except Exception:
+            return False
+
+    def set_autostart(self, enable):
+        if os.name != "nt":
+            return False
+        try:
+            import sys
+            import winreg
+            key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, r"Software\Microsoft\Windows\CurrentVersion\Run", 0, winreg.KEY_SET_VALUE)
+            if enable:
+                exe = sys.executable if getattr(sys, "frozen", False) else f'"{sys.executable}" "{os.path.abspath(sys.argv[0])}"'
+                winreg.SetValueEx(key, "DNS-Switcher", 0, winreg.REG_SZ, exe)
+            else:
+                try:
+                    winreg.DeleteValue(key, "DNS-Switcher")
+                except FileNotFoundError:
+                    pass
+            winreg.CloseKey(key)
+            return True
+        except Exception:
+            return False
+
+    def relaunch_elevated(self):
+        if os.name != "nt":
+            return False
+        try:
+            import ctypes
+            import sys
+            params = " ".join(f'"{arg}"' for arg in sys.argv[1:])
+            res = ctypes.windll.shell32.ShellExecuteW(None, "runas", sys.executable, f'"{sys.argv[0]}" {params}', None, 1)
+            if res > 32:
+                sys.exit(0)
+        except Exception:
+            pass
+        return False

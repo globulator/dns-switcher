@@ -23,7 +23,8 @@ try:
     from PyQt6.QtWidgets import (
         QApplication, QWidget, QVBoxLayout, QHBoxLayout, QLineEdit,
         QPushButton, QLabel, QScrollArea, QFrame, QSystemTrayIcon,
-        QMenu, QMessageBox, QGraphicsDropShadowEffect, QSizePolicy
+        QMenu, QMessageBox, QGraphicsDropShadowEffect, QSizePolicy,
+        QComboBox
     )
 except ImportError:
     try:
@@ -33,7 +34,8 @@ except ImportError:
         from PySide6.QtWidgets import (
             QApplication, QWidget, QVBoxLayout, QHBoxLayout, QLineEdit,
             QPushButton, QLabel, QScrollArea, QFrame, QSystemTrayIcon,
-            QMenu, QMessageBox, QGraphicsDropShadowEffect, QSizePolicy
+            QMenu, QMessageBox, QGraphicsDropShadowEffect, QSizePolicy,
+            QComboBox
         )
     except ImportError:
         print("Ошибка: Для работы трей-приложения требуется PyQt6 или PySide6.")
@@ -61,14 +63,12 @@ DONATE_URL = "https://boosty.to/globulator/donate"
 
 STYLE_SHEET = """
 QWidget#MainWindow {
-    background-color: #242424;
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    border-radius: 14px;
+    background: transparent;
 }
 
 QLineEdit#SearchInput {
-    background-color: rgba(255, 255, 255, 0.08);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    background-color: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.14);
     border-radius: 17px;
     padding: 6px 14px;
     color: #ffffff;
@@ -76,13 +76,13 @@ QLineEdit#SearchInput {
     selection-background-color: #3584e4;
 }
 QLineEdit#SearchInput:focus {
-    border: 1px solid rgba(53, 132, 228, 0.7);
-    background-color: rgba(255, 255, 255, 0.12);
+    border: 1px solid rgba(53, 132, 228, 0.85);
+    background-color: rgba(255, 255, 255, 0.14);
 }
 
 QPushButton.IconButton {
     background-color: rgba(255, 255, 255, 0.08);
-    border: 1px solid rgba(255, 255, 255, 0.12);
+    border: 1px solid rgba(255, 255, 255, 0.14);
     border-radius: 16px;
     color: #ffffff;
     font-size: 14px;
@@ -90,12 +90,12 @@ QPushButton.IconButton {
 }
 QPushButton.IconButton:hover {
     background-color: rgba(255, 255, 255, 0.18);
-    border-color: rgba(255, 255, 255, 0.25);
+    border-color: rgba(255, 255, 255, 0.28);
 }
 
 QFrame#TabsContainer {
-    background-color: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.07);
+    background-color: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.09);
     border-radius: 12px;
 }
 
@@ -103,19 +103,20 @@ QPushButton.TabButton {
     background-color: transparent;
     border: 1px solid transparent;
     border-radius: 9px;
-    color: rgba(255, 255, 255, 0.6);
+    color: rgba(255, 255, 255, 0.7);
     font-size: 12px;
     font-weight: 500;
-    padding: 4px 6px;
+    padding: 5px 6px;
 }
 QPushButton.TabButton:hover {
     color: #ffffff;
-    background-color: rgba(255, 255, 255, 0.1);
+    background-color: rgba(255, 255, 255, 0.12);
 }
 QPushButton.TabButton.ActiveTab {
     color: #ffffff;
-    background-color: rgba(53, 132, 228, 0.35);
-    border: 1px solid rgba(53, 132, 228, 0.75);
+    background-color: #3584e4;
+    border: 1px solid #4a90e2;
+    font-weight: bold;
 }
 
 QScrollArea {
@@ -130,67 +131,69 @@ QFrame.DnsRow {
     background-color: transparent;
     border: 1px solid transparent;
     border-radius: 10px;
-    padding: 3px 6px;
+    padding: 4px 8px;
 }
 QFrame.DnsRow:hover {
-    background-color: rgba(255, 255, 255, 0.08);
+    background-color: rgba(255, 255, 255, 0.09);
 }
 QFrame.DnsRow.ActiveRow {
-    background-color: rgba(255, 255, 255, 0.16);
-    border: 1px solid rgba(255, 255, 255, 0.22);
+    background-color: rgba(53, 132, 228, 0.22);
+    border: 1px solid rgba(53, 132, 228, 0.75);
 }
 QFrame.DnsRow.ActiveRow:hover {
-    background-color: rgba(255, 255, 255, 0.20);
+    background-color: rgba(53, 132, 228, 0.28);
 }
 
 QLabel.DomainTitle {
-    color: #ffffff;
+    color: #e8e8e8;
     font-size: 13px;
 }
 QLabel.DomainTitle.ActiveTitle {
+    color: #ffffff;
     font-weight: 600;
 }
 
 QLabel.BadgeUDP {
     font-size: 10px;
-    color: rgba(255, 255, 255, 0.45);
-    background-color: rgba(255, 255, 255, 0.06);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    font-weight: 600;
+    color: #b0b0b0;
+    background-color: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.12);
     border-radius: 5px;
-    padding: 1px 4px;
+    padding: 1px 5px;
 }
 QLabel.BadgeDoT {
     font-size: 10px;
     font-weight: bold;
     color: #78aeed;
-    background-color: rgba(53, 132, 228, 0.2);
-    border: 1px solid rgba(53, 132, 228, 0.45);
+    background-color: rgba(53, 132, 228, 0.25);
+    border: 1px solid rgba(53, 132, 228, 0.55);
     border-radius: 5px;
-    padding: 1px 4px;
+    padding: 1px 5px;
 }
 QLabel.BadgeDoH {
     font-size: 10px;
     font-weight: bold;
-    color: #e5a50a;
-    background-color: rgba(229, 165, 10, 0.18);
-    border: 1px solid rgba(229, 165, 10, 0.45);
+    color: #f5a623;
+    background-color: rgba(245, 166, 35, 0.22);
+    border: 1px solid rgba(245, 166, 35, 0.55);
     border-radius: 5px;
-    padding: 1px 4px;
+    padding: 1px 5px;
 }
 
 QLabel.LatencyOk {
     font-size: 12px;
-    font-weight: 600;
+    font-weight: bold;
     color: #33d17a;
 }
 QLabel.LatencyError {
     font-size: 12px;
-    color: #f66151;
+    color: #ff5c5c;
 }
 QLabel.LatencyChecking {
     font-size: 13px;
     font-weight: bold;
-    color: rgba(255, 255, 255, 0.45);
+    color: rgba(255, 255, 255, 0.5);
 }
 
 QPushButton.TrashButton {
@@ -201,28 +204,29 @@ QPushButton.TrashButton {
     font-size: 12px;
 }
 QPushButton.TrashButton:hover {
-    color: #f66151;
-    background-color: rgba(255, 255, 255, 0.12);
+    color: #ff5c5c;
+    background-color: rgba(255, 255, 255, 0.14);
 }
 
 QFrame#BottomBar {
-    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
     padding-top: 6px;
 }
 
 QPushButton.BottomBtn {
     background-color: rgba(255, 255, 255, 0.08);
-    border: 1px solid rgba(255, 255, 255, 0.12);
+    border: 1px solid rgba(255, 255, 255, 0.14);
     border-radius: 15px;
     color: #ffffff;
     font-size: 13px;
 }
 QPushButton.BottomBtn:hover {
     background-color: rgba(255, 255, 255, 0.18);
+    border-color: rgba(255, 255, 255, 0.25);
 }
 QPushButton#TargetBtn {
     font-size: 12px;
-    color: rgba(255, 255, 255, 0.85);
+    color: rgba(255, 255, 255, 0.9);
     padding: 4px 10px;
 }
 
@@ -233,20 +237,20 @@ QScrollBar:vertical {
     margin: 0px;
 }
 QScrollBar::handle:vertical {
-    background: rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.25);
     min-height: 25px;
     border-radius: 3px;
 }
 QScrollBar::handle:vertical:hover {
-    background: rgba(255, 255, 255, 0.35);
+    background: rgba(255, 255, 255, 0.45);
 }
 QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
     height: 0px;
 }
 
 QFrame#UpdateBanner {
-    background-color: rgba(53, 132, 228, 0.25);
-    border: 1px solid rgba(53, 132, 228, 0.5);
+    background-color: rgba(53, 132, 228, 0.28);
+    border: 1px solid rgba(53, 132, 228, 0.6);
     border-radius: 8px;
     padding: 6px;
     margin-bottom: 6px;
@@ -319,13 +323,6 @@ class TargetsModal(QFrame):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setObjectName("TargetsModal")
-        self.setStyleSheet("""
-            QFrame#TargetsModal {
-                background-color: #242424;
-                border: 1px solid rgba(255, 255, 255, 0.12);
-                border-radius: 14px;
-            }
-        """)
 
         layout = QVBoxLayout(self)
         layout.setContentsMargins(14, 14, 14, 14)
@@ -340,7 +337,7 @@ class TargetsModal(QFrame):
         btn_close = QPushButton("✕")
         btn_close.setFixedSize(26, 26)
         btn_close.setCursor(Qt.CursorShape.PointingHandCursor)
-        btn_close.setStyleSheet("background: transparent; color: #888; font-size: 14px; border: none;")
+        btn_close.setStyleSheet("background: transparent; color: #aaa; font-size: 14px; border: none;")
         btn_close.clicked.connect(self.close_requested.emit)
         hdr.addWidget(btn_close)
         layout.addLayout(hdr)
@@ -371,6 +368,21 @@ class TargetsModal(QFrame):
 
         self.refresh_targets()
 
+    def paintEvent(self, event):
+        # 100% solid, fully opaque dark slate background
+        p = QPainter(self)
+        p.setRenderHint(QPainter.RenderHint.Antialiasing)
+        p.setBrush(QBrush(QColor(28, 28, 28, 255)))
+        p.setPen(QPen(QColor(60, 60, 60, 255), 1))
+        rect = self.rect().adjusted(1, 1, -1, -1)
+        p.drawRoundedRect(rect, 14, 14)
+
+    def keyPressEvent(self, event):
+        if event.key() == Qt.Key.Key_Escape:
+            self.close_requested.emit()
+        else:
+            super().keyPressEvent(event)
+
     def refresh_targets(self):
         while self.targets_layout.count():
             item = self.targets_layout.takeAt(0)
@@ -385,12 +397,13 @@ class TargetsModal(QFrame):
             row.setObjectName("TargetRow")
             row.setStyleSheet("""
                 QFrame#TargetRow {
-                    background-color: rgba(255, 255, 255, 0.05);
+                    background-color: rgba(255, 255, 255, 0.06);
+                    border: 1px solid rgba(255, 255, 255, 0.08);
                     border-radius: 8px;
                     padding: 4px;
                 }
                 QFrame#TargetRow:hover {
-                    background-color: rgba(255, 255, 255, 0.1);
+                    background-color: rgba(255, 255, 255, 0.12);
                 }
             """)
             rl = QHBoxLayout(row)
@@ -398,7 +411,7 @@ class TargetsModal(QFrame):
 
             is_active = (t == active)
             dot = QLabel("●" if is_active else "○")
-            dot.setStyleSheet("color: #3584e4; font-size: 14px;" if is_active else "color: #666; font-size: 14px;")
+            dot.setStyleSheet("color: #3584e4; font-size: 14px;" if is_active else "color: #888; font-size: 14px;")
             rl.addWidget(dot)
 
             lbl = QLabel(t)
@@ -408,7 +421,7 @@ class TargetsModal(QFrame):
 
             if not is_active:
                 btn_sel = QPushButton("Выбрать")
-                btn_sel.setStyleSheet("color: #3584e4; font-size: 11px; background: transparent; border: none;")
+                btn_sel.setStyleSheet("color: #78aeed; font-size: 11px; background: transparent; border: none; font-weight: bold;")
                 btn_sel.setCursor(Qt.CursorShape.PointingHandCursor)
                 btn_sel.clicked.connect(lambda _, host=t: self._select_target(host))
                 rl.addWidget(btn_sel)
@@ -464,7 +477,8 @@ class MainWindow(QWidget):
     def __init__(self):
         super().__init__()
         self.setObjectName("MainWindow")
-        self.setWindowFlags(Qt.WindowType.FramelessWindowHint | Qt.WindowType.Popup)
+        # Use Tool window hint for reliable tray flyout behavior on Windows
+        self.setWindowFlags(Qt.WindowType.FramelessWindowHint | Qt.WindowType.Tool)
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
         self.setStyleSheet(STYLE_SHEET)
         self.setFixedWidth(360)
@@ -483,6 +497,11 @@ class MainWindow(QWidget):
         self.dot_timer = QTimer(self)
         self.dot_timer.timeout.connect(self._on_dot_frame)
 
+        # Timer to monitor active network connection / DNS changes
+        self.status_timer = QTimer(self)
+        self.status_timer.timeout.connect(self._refresh_active)
+        self.status_timer.start(5000)
+
         self._init_ui()
         self._refresh_rows()
 
@@ -490,11 +509,66 @@ class MainWindow(QWidget):
         self.update_worker.update_signal.connect(self._on_update_found)
         self.update_worker.start()
 
+    def paintEvent(self, event):
+        # 100% solid, fully opaque dark background - prevents any transparency bleed-through!
+        p = QPainter(self)
+        p.setRenderHint(QPainter.RenderHint.Antialiasing)
+        p.setBrush(QBrush(QColor(28, 28, 28, 255)))
+        p.setPen(QPen(QColor(60, 60, 60, 255), 1))
+        rect = self.rect().adjusted(1, 1, -1, -1)
+        p.drawRoundedRect(rect, 14, 14)
+
+    def changeEvent(self, event):
+        # Auto-close on click outside window
+        if event.type() == QtCore.QEvent.Type.ActivationChange:
+            if not self.isActiveWindow():
+                if not self.targets_modal.isVisible():
+                    self.hide()
+        super().changeEvent(event)
+
+    def keyPressEvent(self, event):
+        if event.key() == Qt.Key.Key_Escape:
+            if self.targets_modal.isVisible():
+                self.targets_modal.hide()
+            elif self.add_container.isVisible():
+                self._toggle_add_row()
+            else:
+                self.hide()
+        else:
+            super().keyPressEvent(event)
+
     def _init_ui(self):
         self.root_layout = QVBoxLayout(self)
         self.root_layout.setContentsMargins(12, 12, 12, 12)
         self.root_layout.setSpacing(8)
 
+        # 0a. Admin Warning Banner (shown if launched without admin privileges)
+        self.admin_banner = QFrame()
+        self.admin_banner.setStyleSheet("""
+            QFrame {
+                background-color: rgba(229, 165, 10, 0.22);
+                border: 1px solid rgba(229, 165, 10, 0.6);
+                border-radius: 8px;
+                padding: 4px;
+            }
+        """)
+        ab_layout = QHBoxLayout(self.admin_banner)
+        ab_layout.setContentsMargins(6, 4, 6, 4)
+        lbl_admin = QLabel("⚠️ Запущено без прав администратора")
+        lbl_admin.setStyleSheet("color: #ffcc00; font-size: 11px; font-weight: bold;")
+        ab_layout.addWidget(lbl_admin)
+        ab_layout.addStretch()
+        btn_elevate = QPushButton("Дать права")
+        btn_elevate.setStyleSheet("background-color: #e5a50a; color: #000; border: none; border-radius: 4px; padding: 2px 6px; font-size: 11px; font-weight: bold;")
+        btn_elevate.setCursor(Qt.CursorShape.PointingHandCursor)
+        btn_elevate.clicked.connect(self._relaunch_as_admin)
+        ab_layout.addWidget(btn_elevate)
+        self.root_layout.addWidget(self.admin_banner)
+
+        if self.adapter.is_admin():
+            self.admin_banner.hide()
+
+        # 0b. Update Banner
         self.update_banner = QFrame()
         self.update_banner.setObjectName("UpdateBanner")
         ub_layout = QHBoxLayout(self.update_banner)
@@ -504,12 +578,13 @@ class MainWindow(QWidget):
         ub_layout.addWidget(self.lbl_update)
         ub_layout.addStretch()
         self.btn_update = QPushButton("Скачать")
-        self.btn_update.setStyleSheet("background-color: #3584e4; color: #fff; border: none; border-radius: 4px; padding: 2px 8px;")
+        self.btn_update.setStyleSheet("background-color: #3584e4; color: #fff; border: none; border-radius: 4px; padding: 2px 8px; font-weight: bold;")
         self.btn_update.setCursor(Qt.CursorShape.PointingHandCursor)
         ub_layout.addWidget(self.btn_update)
         self.root_layout.addWidget(self.update_banner)
         self.update_banner.hide()
 
+        # 1. Search Bar & Sort Button
         search_box = QHBoxLayout()
         search_box.setSpacing(6)
 
@@ -530,6 +605,7 @@ class MainWindow(QWidget):
 
         self.root_layout.addLayout(search_box)
 
+        # 2. Category Tabs
         self.tabs_container = QFrame()
         self.tabs_container.setObjectName("TabsContainer")
         self.tabs_layout = QHBoxLayout(self.tabs_container)
@@ -538,7 +614,7 @@ class MainWindow(QWidget):
 
         presets = load_presets()
         self.tab_buttons = {}
-        category_labels = {
+        self.category_labels = {
             "bypass": "🛡️ Обход",
             "security": "🔒 Защита",
             "global": "🌍 Мир",
@@ -546,7 +622,7 @@ class MainWindow(QWidget):
         }
         for cat in presets.get("categories", []):
             cid = cat["id"]
-            lbl = category_labels.get(cid, cat.get("title", ""))
+            lbl = self.category_labels.get(cid, cat.get("title", ""))
             btn = QPushButton(lbl)
             btn.setToolTip(cat.get("title", ""))
             btn.setProperty("cat_id", cid)
@@ -559,6 +635,7 @@ class MainWindow(QWidget):
 
         self.root_layout.addWidget(self.tabs_container)
 
+        # 3. Scrollable DNS List
         self.scroll = QScrollArea()
         self.scroll.setWidgetResizable(True)
         self.scroll_content = QWidget()
@@ -569,6 +646,7 @@ class MainWindow(QWidget):
         self.scroll.setWidget(self.scroll_content)
         self.root_layout.addWidget(self.scroll)
 
+        # 4. Default DNS (DHCP) Row
         self.default_row = QFrame()
         self.default_row.setProperty("class", "DnsRow")
         self.default_row.setCursor(Qt.CursorShape.PointingHandCursor)
@@ -594,29 +672,65 @@ class MainWindow(QWidget):
 
         self.root_layout.addWidget(self.default_row)
 
+        # 5. Inline Add Container (with category selector)
         self.add_container = QFrame()
-        self.add_container.setStyleSheet("background-color: rgba(255,255,255,0.05); border-radius: 8px; padding: 4px;")
-        add_layout = QHBoxLayout(self.add_container)
-        add_layout.setContentsMargins(6, 4, 6, 4)
+        self.add_container.setStyleSheet("background-color: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 6px;")
+        add_layout = QVBoxLayout(self.add_container)
+        add_layout.setContentsMargins(6, 6, 6, 6)
         add_layout.setSpacing(6)
 
+        # Row 1: input + save button
+        add_row1 = QHBoxLayout()
+        add_row1.setSpacing(6)
         self.new_dns_input = QLineEdit()
         self.new_dns_input.setPlaceholderText("Домен DNS (напр. dns.google)...")
         self.new_dns_input.setObjectName("SearchInput")
         self.new_dns_input.returnPressed.connect(self._save_new_dns)
-        add_layout.addWidget(self.new_dns_input)
+        add_row1.addWidget(self.new_dns_input)
 
         self.btn_save_dns = QPushButton("✔")
         self.btn_save_dns.setObjectName("IconButton")
         self.btn_save_dns.setProperty("class", "IconButton")
-        self.btn_save_dns.setFixedSize(30, 30)
+        self.btn_save_dns.setFixedSize(32, 32)
         self.btn_save_dns.setCursor(Qt.CursorShape.PointingHandCursor)
         self.btn_save_dns.clicked.connect(self._save_new_dns)
-        add_layout.addWidget(self.btn_save_dns)
+        add_row1.addWidget(self.btn_save_dns)
+        add_layout.addLayout(add_row1)
+
+        # Row 2: category picker
+        add_row2 = QHBoxLayout()
+        add_row2.setSpacing(6)
+        lbl_cat_sel = QLabel("В категорию:")
+        lbl_cat_sel.setStyleSheet("color: rgba(255,255,255,0.7); font-size: 11px;")
+        add_row2.addWidget(lbl_cat_sel)
+
+        self.add_cat_combo = QComboBox()
+        self.add_cat_combo.setStyleSheet("""
+            QComboBox {
+                background-color: rgba(255,255,255,0.1);
+                color: #ffffff;
+                border: 1px solid rgba(255,255,255,0.15);
+                border-radius: 6px;
+                padding: 2px 8px;
+                font-size: 11px;
+            }
+            QComboBox QAbstractItemView {
+                background-color: #242424;
+                color: #ffffff;
+                selection-background-color: #3584e4;
+            }
+        """)
+        for cat in presets.get("categories", []):
+            clbl = self.category_labels.get(cat["id"], cat.get("title", ""))
+            self.add_cat_combo.addItem(clbl, cat["id"])
+        add_row2.addWidget(self.add_cat_combo)
+        add_row2.addStretch()
+        add_layout.addLayout(add_row2)
 
         self.root_layout.addWidget(self.add_container)
         self.add_container.hide()
 
+        # 6. Bottom Bar
         bottom_bar = QFrame()
         bottom_bar.setObjectName("BottomBar")
         bb_layout = QHBoxLayout(bottom_bar)
@@ -665,6 +779,10 @@ class MainWindow(QWidget):
 
         self._update_tab_styles()
 
+    def _relaunch_as_admin(self):
+        if hasattr(self.adapter, "relaunch_elevated"):
+            self.adapter.relaunch_elevated()
+
     def resizeEvent(self, event):
         super().resizeEvent(event)
         self.targets_modal.setGeometry(self.rect())
@@ -688,15 +806,20 @@ class MainWindow(QWidget):
             self.add_container.hide()
             self.btn_show_add.setText("+")
         else:
+            # Set combo to current tab
+            idx = self.add_cat_combo.findData(self.active_category)
+            if idx >= 0:
+                self.add_cat_combo.setCurrentIndex(idx)
             self.add_container.show()
             self.btn_show_add.setText("✕")
             self.new_dns_input.setFocus()
 
     def _save_new_dns(self):
         text = self.new_dns_input.text().strip()
+        cat_id = self.add_cat_combo.currentData() or self.active_category
         if text:
             try:
-                add_dns(text, self.active_category)
+                add_dns(text, cat_id)
             except ValueError:
                 return
             self.new_dns_input.clear()
@@ -726,6 +849,18 @@ class MainWindow(QWidget):
 
     def _on_search_changed(self, text):
         self.search_query = text.strip().lower()
+        self._refresh_rows()
+
+    def _refresh_active(self):
+        active_status = self.adapter.get_current_dns()
+        active_dom = active_status.get("domain", "DEFAULT")
+        conn_name = active_status.get("connection", "")
+        # Update tray tooltip dynamically
+        t_icon = globals().get("tray_icon")
+        if t_icon:
+            display_dom = "По умолчанию (DHCP)" if active_dom == "DEFAULT" else active_dom
+            conn_display = f" [{conn_name}]" if conn_name else ""
+            t_icon.setToolTip(f"DNS Switcher: {display_dom}{conn_display}")
         self._refresh_rows()
 
     def _refresh_rows(self):
@@ -810,12 +945,8 @@ class MainWindow(QWidget):
             cache = self.cached_latencies.get(dom, {})
             proto = cache.get("proto", "udp").lower()
             badge = QLabel(proto.upper())
-            if proto == "dot":
-                badge.setProperty("class", "BadgeDoT")
-            elif proto == "doh":
-                badge.setProperty("class", "BadgeDoH")
-            else:
-                badge.setProperty("class", "BadgeUDP")
+            cls_map = {"dot": "BadgeDoT", "doh": "BadgeDoH", "udp": "BadgeUDP"}
+            badge.setProperty("class", cls_map.get(proto, "BadgeUDP"))
             rl.addWidget(badge)
 
             latency = QLabel()
@@ -860,7 +991,11 @@ class MainWindow(QWidget):
             self._refresh_rows()
             dom = res.get("domain", "")
             msg = "Настройки сброшены на автоматические (DHCP)" if dom == "DEFAULT" else f"Активный DNS переключен на {dom}"
-            tray_icon.showMessage("DNS Switcher", msg, QSystemTrayIcon.MessageIcon.Information, 2000)
+            t_icon = globals().get("tray_icon")
+            if t_icon:
+                t_icon.showMessage("DNS Switcher", msg, QSystemTrayIcon.MessageIcon.Information, 2000)
+                display_dom = "По умолчанию (DHCP)" if dom == "DEFAULT" else dom
+                t_icon.setToolTip(f"DNS Switcher: {display_dom}")
         else:
             err = res.get("error", "Неизвестная ошибка")
             QMessageBox.warning(self, "Ошибка смены DNS", err)
@@ -959,20 +1094,41 @@ class SystemTrayApp:
             QMenu {
                 background-color: #242424;
                 color: #ffffff;
-                border: 1px solid rgba(255,255,255,0.15);
-                border-radius: 6px;
-                padding: 4px;
+                border: 1px solid rgba(255,255,255,0.18);
+                border-radius: 8px;
+                padding: 6px;
+            }
+            QMenu::item {
+                padding: 6px 20px;
+                border-radius: 4px;
             }
             QMenu::item:selected {
                 background-color: #3584e4;
-                border-radius: 4px;
+                color: #ffffff;
+            }
+            QMenu::separator {
+                height: 1px;
+                background: rgba(255,255,255,0.12);
+                margin: 4px 6px;
             }
         """)
         action_open = menu.addAction("Открыть DNS Switcher")
         action_open.triggered.connect(self.toggle_window)
 
+        action_refresh = menu.addAction("Обновить замеры задержки")
+        action_refresh.triggered.connect(self.window._start_probe)
+
         action_default = menu.addAction("Сбросить на DNS по умолчанию")
         action_default.triggered.connect(lambda: self.window._apply_dns("DEFAULT"))
+
+        menu.addSeparator()
+
+        # Autostart checkbox
+        self.action_autostart = menu.addAction("Запускать вместе с Windows")
+        self.action_autostart.setCheckable(True)
+        if hasattr(self.window.adapter, "get_autostart"):
+            self.action_autostart.setChecked(self.window.adapter.get_autostart())
+        self.action_autostart.triggered.connect(self._toggle_autostart)
 
         menu.addSeparator()
         action_quit = menu.addAction("Выход")
@@ -984,6 +1140,11 @@ class SystemTrayApp:
 
         global tray_icon
         tray_icon = self.tray
+        self.window._refresh_active()
+
+    def _toggle_autostart(self, checked):
+        if hasattr(self.window.adapter, "set_autostart"):
+            self.window.adapter.set_autostart(checked)
 
     def _on_tray_activated(self, reason):
         if reason == QSystemTrayIcon.ActivationReason.Trigger:
@@ -993,6 +1154,7 @@ class SystemTrayApp:
         if self.window.isVisible():
             self.window.hide()
         else:
+            self.window._refresh_active()
             self.position_window_near_tray()
             self.window.show()
             self.window.raise_()
@@ -1016,7 +1178,6 @@ class SystemTrayApp:
             target_h = 24
 
         x = target_x - w // 2
-        # If tray is in top half of screen (e.g. top taskbar/panel): place below
         if target_y < screen_geo.center().y():
             y = target_y + target_h + 10
         else:

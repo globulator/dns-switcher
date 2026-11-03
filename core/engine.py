@@ -104,7 +104,7 @@ def extract_ips_from_dns(resp):
     except Exception:
         return []
 
-def resolve_v4(host, timeout=1.5):
+def resolve_v4(host, timeout=1.8):
     try:
         ipaddress.IPv4Address(host)
         return [host]
@@ -114,7 +114,7 @@ def resolve_v4(host, timeout=1.5):
     result = []
     def work():
         try:
-            infos = socket.getaddrinfo(host, 53, socket.AF_INET, socket.SOCK_DGRAM)
+            infos = socket.getaddrinfo(host, None, socket.AF_INET, socket.SOCK_STREAM)
             result.extend(dict.fromkeys(info[4][0] for info in infos))
         except OSError:
             pass
@@ -122,7 +122,23 @@ def resolve_v4(host, timeout=1.5):
     t = threading.Thread(target=work, daemon=True)
     t.start()
     t.join(timeout)
-    return [] if t.is_alive() else list(result)
+    if result:
+        return list(result)
+
+    # Fallback resolution via public resolvers if local resolver fails
+    try:
+        qid, pkt = make_dns_query(host)
+        for bootstrap_ip in ("1.1.1.1", "77.88.8.8", "8.8.8.8"):
+            r = udp_query(bootstrap_ip, qid, pkt, 1.0)
+            if r:
+                resp, _ = r
+                found = extract_ips_from_dns(resp)
+                if found:
+                    return found
+    except Exception:
+        pass
+
+    return []
 
 def check_target_reachability(ips, target_host):
     ips = [ip for ip in ips if is_global(ip)]
