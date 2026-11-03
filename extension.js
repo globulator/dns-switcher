@@ -542,6 +542,15 @@ class DnsSwitcherIndicator extends PanelMenu.Button {
 
         mainBox.add_child(bottomBar);
 
+        const appVer = (this.extension.metadata && this.extension.metadata['version-name']) || '1.0.3';
+        const versionLabel = new St.Label({
+            style_class: 'dns-version-label',
+            text: `DNS Switcher v${appVer}`,
+            x_align: Clutter.ActorAlign.CENTER,
+            y_align: Clutter.ActorAlign.CENTER,
+        });
+        mainBox.add_child(versionLabel);
+
         const menuItem = new PopupMenu.PopupBaseMenuItem({
             reactive: false,
             can_focus: false,

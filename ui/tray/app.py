@@ -255,6 +255,13 @@ QFrame#UpdateBanner {
     padding: 6px;
     margin-bottom: 6px;
 }
+
+QLabel#VersionLabel {
+    color: rgba(255, 255, 255, 0.35);
+    font-size: 10px;
+    padding-top: 2px;
+    padding-bottom: 2px;
+}
 """
 
 def generate_app_icon():
@@ -771,6 +778,13 @@ class MainWindow(QWidget):
         bb_layout.addWidget(self.btn_donate)
 
         self.root_layout.addWidget(bottom_bar)
+
+        # 7. Version Label
+        self.lbl_version = QLabel(f"DNS Switcher v{updater.CURRENT_VERSION}")
+        self.lbl_version.setObjectName("VersionLabel")
+        self.lbl_version.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.lbl_version.setToolTip(f"Версия приложения: {updater.CURRENT_VERSION}")
+        self.root_layout.addWidget(self.lbl_version)
 
         self.targets_modal = TargetsModal(self)
         self.targets_modal.target_changed.connect(self._on_target_changed)

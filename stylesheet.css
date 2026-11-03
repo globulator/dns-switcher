@@ -559,4 +559,14 @@ button.dns-btn-add-apply:hover {
     color: #ffffff !important;
 }
 
+/* Version label at bottom of menu */
+.dns-version-label {
+    font-size: 8.5pt;
+    color: rgba(255, 255, 255, 0.35);
+    margin-top: 4px;
+    margin-bottom: 2px;
+    text-align: center;
+}
+
+
 
